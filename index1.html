@@ -1,28 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IP Location Tracker</title>
+  <title>Location Logger</title>
 </head>
 <body>
-  <h2>Checking Your Location...</h2>
-  <p id="output"></p>
-
+  <h2>Getting your location...</h2>
   <script>
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("output").innerHTML = `
-          <b>IP:</b> ${data.ip} <br>
-          <b>City:</b> ${data.city} <br>
-          <b>Region:</b> ${data.region} <br>
-          <b>Country:</b> ${data.country_name} <br>
-          <b>Latitude:</b> ${data.latitude} <br>
-          <b>Longitude:</b> ${data.longitude}
-        `;
-      })
-      .catch(err => {
-        document.getElementById("output").innerHTML = "Error fetching location.";
-      });
+    // Replace this with your Google Apps Script Web App URL
+    const scriptURL = "YOUR_WEB_APP_URL_HERE";
+
+    // Get user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+      document.body.innerHTML = "Geolocation is not supported by this browser.";
+    }
+
+    function success(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      // Send data to Google Sheet
+      fetch(`${scriptURL}?lat=${latitude}&lng=${longitude}`)
+        .then(() => {
+          document.body.innerHTML = `<h3>✅ Location captured!</h3>
+          <p>Latitude: ${latitude}</p>
+          <p>Longitude: ${longitude}</p>`;
+        })
+        .catch(() => {
+          document.body.innerHTML = "❌ Failed to send location.";
+        });
+    }
+
+    function error() {
+      document.body.innerHTML = "❌ Unable to retrieve your location.";
+    }
   </script>
 </body>
 </html>
