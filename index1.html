@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IP Location Tracker</title>
+</head>
+<body>
+  <h2>Checking Your Location...</h2>
+  <p id="output"></p>
+
+  <script>
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("output").innerHTML = `
+          <b>IP:</b> ${data.ip} <br>
+          <b>City:</b> ${data.city} <br>
+          <b>Region:</b> ${data.region} <br>
+          <b>Country:</b> ${data.country_name} <br>
+          <b>Latitude:</b> ${data.latitude} <br>
+          <b>Longitude:</b> ${data.longitude}
+        `;
+      })
+      .catch(err => {
+        document.getElementById("output").innerHTML = "Error fetching location.";
+      });
+  </script>
+</body>
+</html>
